@@ -59,6 +59,11 @@
           .domain([0, 1])
           .range(["steelblue", "green"]);
 
+        let vaccinationColorScale = d3
+          .scaleOrdinal()
+          .domain([0, 1, 2])
+          .range(["pink", "red", "darkred"]);
+
         let mouseOver = function (event, d) {
           d3.selectAll(".node")
             .transition()
@@ -234,12 +239,12 @@
             )
             .alphaTarget(0.3)
             .restart();
-          d3.selectAll("circle")
-            .style("fill", (d) => {
-              if (d.gender == "male") return colorScale(0);
-              else return colorScale(1);
-            })
-            .attr("stroke-width", 0);
+          d3.selectAll("circle").style("fill", (d) => {
+            if (d.vaccinated.includes("yes")) return vaccinationColorScale(0);
+            else if (d.vaccinated.includes("no"))
+              return vaccinationColorScale(2);
+            else return vaccinationColorScale(1);
+          });
         });
 
         d3.select("#group2").on("click", function () {
@@ -260,6 +265,12 @@
             )
             .alphaTarget(0.3)
             .restart();
+          d3.selectAll("circle")
+            .style("fill", (d) => {
+              if (d.gender == "male") return colorScale(0);
+              else return colorScale(1);
+            })
+            .attr("stroke-width", 0);
         });
 
         let xPosition = d3
