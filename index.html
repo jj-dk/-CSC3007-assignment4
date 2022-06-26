@@ -23,7 +23,7 @@
     <div class="container">
       <h1>Force Network Diagram for Covid cases in Singapore</h1>
       <button id="group1">Group by Vaccination Status</button>
-      <button id="group2">Merge</button>
+      <button id="group2">Group by Gender</button>
       <svg></svg>
     </div>
 
@@ -57,12 +57,20 @@
         let colorScale = d3
           .scaleOrdinal()
           .domain([0, 1])
-          .range(["steelblue", "green"]);
+          .range(["steelblue", "pink"]);
 
         let vaccinationColorScale = d3
           .scaleOrdinal()
           .domain([0, 1, 2])
-          .range(["pink", "red", "darkred"]);
+          .range(["green", "orange", "red"]);
+
+        // create a list of genders
+        var genderKeys = ["Male", "Female"];
+        var vaccinationKeys = [
+          "Vaccinated",
+          "Partially Vaccinated",
+          "Not Vaccinated",
+        ];
 
         let mouseOver = function (event, d) {
           d3.selectAll(".node")
@@ -149,9 +157,9 @@
         svg
           .append("svg:defs")
           .selectAll("marker")
-          .data(["end"]) // Different link/path types can be defined here
+          .data(["end"])
           .enter()
-          .append("svg:marker") // This section adds in the arrows
+          .append("svg:marker")
           .attr("id", String)
           .attr("viewBox", "0 -5 10 10")
           .attr("refX", 6)
@@ -172,6 +180,46 @@
           .attr("marker-end", "url(#end)")
           .attr("fill", "none")
           .attr("stroke", "black");
+
+        // Add one dot in the legend for each name.
+        var size = 20;
+        let dots = svg
+          .append("g")
+          .selectAll("mydots")
+          .data(genderKeys)
+          .enter()
+          .append("rect")
+          .attr("x", 100)
+          .attr("y", function (d, i) {
+            return 100 + i * (size + 5);
+          })
+          .attr("width", size)
+          .attr("height", size)
+          .style("fill", (d) => {
+            if (d == "Male") return colorScale(0);
+            else return colorScale(1);
+          });
+
+        // Add one dot in the legend for each name.
+        let labels = svg
+          .append("g")
+          .selectAll("mylabels")
+          .data(genderKeys)
+          .enter()
+          .append("text")
+          .attr("x", 100 + size * 1.2)
+          .attr("y", function (d, i) {
+            return 100 + i * (size + 5) + size / 2;
+          })
+          .style("fill", (d) => {
+            if (d == "Male") return colorScale(0);
+            else return colorScale(1);
+          })
+          .text(function (d) {
+            return d;
+          })
+          .attr("text-anchor", "left")
+          .style("alignment-baseline", "middle");
 
         function dragstarted(event, d) {
           if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -245,6 +293,49 @@
               return vaccinationColorScale(2);
             else return vaccinationColorScale(1);
           });
+
+          dots.remove();
+          labels.remove();
+
+          dots = svg
+            .append("g")
+            .selectAll("mydots")
+            .data(vaccinationKeys)
+            .enter()
+            .append("rect")
+            .attr("x", 100)
+            .attr("y", function (d, i) {
+              return 100 + i * (size + 5);
+            })
+            .attr("width", size)
+            .attr("height", size)
+            .style("fill", (d) => {
+              if (d == "Vaccinated") return vaccinationColorScale(0);
+              else if (d == "Not Vaccinated") return vaccinationColorScale(2);
+              else return vaccinationColorScale(1);
+            });
+
+          // Add one dot in the legend for each name.
+          labels = svg
+            .append("g")
+            .selectAll("mylabels")
+            .data(vaccinationKeys)
+            .enter()
+            .append("text")
+            .attr("x", 100 + size * 1.2)
+            .attr("y", function (d, i) {
+              return 100 + i * (size + 5) + size / 2;
+            })
+            .style("fill", (d) => {
+              if (d == "Vaccinated") return vaccinationColorScale(0);
+              else if (d == "Not Vaccinated") return vaccinationColorScale(2);
+              else return vaccinationColorScale(1);
+            })
+            .text(function (d) {
+              return d;
+            })
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle");
         });
 
         d3.select("#group2").on("click", function () {
@@ -253,14 +344,17 @@
               "x",
               d3
                 .forceX()
-                .strength(0.1)
-                .x(width / 2)
+                .strength(0.4)
+                .x((d) => {
+                  if (d.gender == "male") return 200;
+                  else return 800;
+                })
             )
             .force(
               "y",
               d3
                 .forceY()
-                .strength(0.1)
+                .strength(0.4)
                 .y(height / 2)
             )
             .alphaTarget(0.3)
@@ -271,6 +365,47 @@
               else return colorScale(1);
             })
             .attr("stroke-width", 0);
+
+          dots.remove();
+          labels.remove();
+
+          dots = svg
+            .append("g")
+            .selectAll("mydots")
+            .data(genderKeys)
+            .enter()
+            .append("rect")
+            .attr("x", 100)
+            .attr("y", function (d, i) {
+              return 100 + i * (size + 5);
+            })
+            .attr("width", size)
+            .attr("height", size)
+            .style("fill", (d) => {
+              if (d == "Male") return colorScale(0);
+              else return colorScale(1);
+            });
+
+          // Add one dot in the legend for each name.
+          labels = svg
+            .append("g")
+            .selectAll("mylabels")
+            .data(genderKeys)
+            .enter()
+            .append("text")
+            .attr("x", 100 + size * 1.2)
+            .attr("y", function (d, i) {
+              return 100 + i * (size + 5) + size / 2;
+            })
+            .style("fill", (d) => {
+              if (d == "Male") return colorScale(0);
+              else return colorScale(1);
+            })
+            .text(function (d) {
+              return d;
+            })
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle");
         });
 
         let xPosition = d3
